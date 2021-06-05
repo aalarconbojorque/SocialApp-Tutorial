@@ -1,5 +1,8 @@
 <template>
   <div id="dashboard">
+    <transition name="fade">
+      <CommentModal v-if="showCommentModal" :post="selectedPost" @close="toggleCommentModal()"></CommentModal>
+    </transition>
     <section>
       <div class="col1">
         <div class="profile">
@@ -38,13 +41,19 @@
 <script>
 import { mapState } from 'vuex'
 import moment from 'moment'
+import CommentModal from '@/components/CommentModal'
 
 export default {
+  components: {
+    CommentModal
+  },
   data() {
     return {
       post: {
         content: ''
-      }
+      },
+      showCommentModal: false,
+      selectedPost: {}
     }
   },
   computed: {
@@ -60,7 +69,17 @@ export default {
     
     let date = val.toDate()
     return moment(date).fromNow()
-  },
+    },
+    toggleCommentModal(post) {
+      this.showCommentModal = !this.showCommentModal
+
+      // if opening modal set selectedPost, else clear
+      if (this.showCommentModal) {
+        this.selectedPost = post
+      } else {
+        this.selectedPost = {}
+      }
+    }
     
   }
   
