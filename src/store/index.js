@@ -3,13 +3,31 @@ import * as fb from '../firebase'
 import router from '../router/index'
 
 
-export default createStore({
+fb.postsCollection.orderBy('createdOn', 'desc').onSnapshot(snapshot => {
+  let postsArray = []
+
+  snapshot.forEach(doc => {
+    let post = doc.data()
+    post.id = doc.id
+
+    postsArray.push(post)
+  })
+
+  store.commit('setPosts', postsArray)
+})
+
+
+const store = createStore({
   state: {
-    userProfile: {}
+    userProfile: {},
+    posts: []
   },
   mutations: {
     setUserProfile(state, val) {
       state.userProfile = val
+    },
+    setPosts(state, val) {
+      state.posts = val
     }
   },
   actions: {
@@ -28,7 +46,10 @@ export default createStore({
       commit('setUserProfile', userProfile.data())
       
       // change route to dashboard
-      router.push('/')
+      if (router.currentRoute._value.path === '/login') 
+      {
+        router.push('/')
+      }
     },
     async signup({ dispatch }, form) {
       // sign user up
@@ -42,8 +63,30 @@ export default createStore({
     
       // fetch user profile and set in state
       dispatch('fetchUserProfile', user)
+    },
+
+    async logout({ commit }) {
+      await fb.auth.signOut()
+    
+      // clear userProfile and redirect to /login
+      commit('setUserProfile', {})
+      router.push('/login')
+    },
+
+    async createPost({ state }, post) {
+      await fb.postsCollection.add({
+        createdOn: new Date(),
+        content: post.content,
+        userId: fb.auth.currentUser.uid,
+        userName: state.userProfile.name,
+        comments: 0,
+        likes: 0
+      })
     }
+    
   },
   modules: {
   }
 })
+
+export default store
