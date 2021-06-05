@@ -13,7 +13,7 @@ auth.onAuthStateChanged(user => {
   //If we do not have an app instance, create a new one  
   if (!app) {
     app = createApp(App).use(store).use(router).mount('#app')
-
+    console.log(app)
   }
 
   //If a user is logged in, fetch profile
