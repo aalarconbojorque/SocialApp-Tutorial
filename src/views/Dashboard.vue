@@ -79,6 +79,9 @@ export default {
       } else {
         this.selectedPost = {}
       }
+    },
+    likePost(id, likesCount) {
+      this.$store.dispatch('likePost', { id, likesCount })
     }
     
   }
